@@ -2,10 +2,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { QrCodePane } from "@/components/qr-code-pane"
 import { CardPane } from "@/components/card-pane"
 import { CryptoPane } from "@/components/crypto-pane"
-import { QrCode, CreditCard, Wallet } from "lucide-react"
+import { CreditCard, Wallet } from "lucide-react"
 
 interface PaymentFormProps {
   state: any
@@ -20,14 +19,7 @@ export function PaymentForm({ state, updateState }: PaymentFormProps) {
       </CardHeader>
       <CardContent>
         <Tabs value={state.ui.method} onValueChange={(value) => updateState("ui.method", value)} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-gray-800">
-            <TabsTrigger
-              value="qr"
-              className="flex items-center gap-2 data-[state=active]:bg-[#27e9b5] data-[state=active]:text-black"
-            >
-              <QrCode className="w-4 h-4" />
-              Pay with QR
-            </TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-gray-800">
             <TabsTrigger
               value="card"
               className="flex items-center gap-2 data-[state=active]:bg-[#27e9b5] data-[state=active]:text-black"
@@ -43,10 +35,6 @@ export function PaymentForm({ state, updateState }: PaymentFormProps) {
               Crypto / Web3
             </TabsTrigger>
           </TabsList>
-
-          <TabsContent value="qr" className="mt-6">
-            <QrCodePane state={state} updateState={updateState} />
-          </TabsContent>
 
           <TabsContent value="card" className="mt-6">
             <CardPane state={state} updateState={updateState} />

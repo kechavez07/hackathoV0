@@ -8,13 +8,9 @@ import { PaymentFooter } from "@/components/payment-footer"
 
 export default function PaymentPage() {
   const [state, setState] = useState({
-    ui: { method: "qr" },
+    ui: { method: "card" },
     amount: 123.45,
     currency: "USD",
-    qr: {
-      payload: "pay://qr?amount=123.45&ref=ORDER-1234",
-      expiresAt: null,
-    },
     card: {
       name: "",
       number: "",
@@ -31,7 +27,6 @@ export default function PaymentPage() {
       signDelivery: true,
     },
     loading: {
-      qr: false,
       card: false,
       wallet: false,
       crypto: false,
