@@ -1,1 +1,35 @@
-
+{
+  "name": "lisk-trustpay-backend",
+  "version": "1.0.0",
+  "description": "App de pasarela de pagos usando tecnologías de web 3 con Lisk",
+  "main": "dist/app.js",
+  "scripts": {
+    "start": "node dist/app.js",
+    "dev": "nodemon src/app.ts",
+    "build": "tsc",
+    "build:watch": "tsc --watch"
+  },
+  "keywords": [
+    "lisk",
+    "blockchain",
+    "escrow",
+    "payments",
+    "web3",
+    "trustpay"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "dotenv": "^16.4.5",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "typescript": "^5.4.5",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.7",
+    "@types/cors": "^2.8.17",
+    "ts-node": "^10.9.2"
+  }
+}
