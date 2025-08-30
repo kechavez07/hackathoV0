@@ -2,7 +2,7 @@
 
 La idea es desarrollar una app que resuelva la actual problemática de desconfianza que existe entre vendedor y consumidor. Este problema se ve reflejado en Apps de delibery donde pedidos no son entregados o son robados. En ventas online realizadas por redes sociales donde el vendedor no sabe si existe el consumidor y viceversa el cliente no tiene la confianza que el vendedor exista. Además la idea seria que sea aplicable a muchas apps de la actualidad que presenten este problema.
 
-lisk-trustpay/
+Backend/
 ├── src/
 │   ├── controllers/
 │   │   ├── authController.ts

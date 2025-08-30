@@ -1,4 +1,3 @@
-import { createWSClient } from '@liskhq/lisk-client';
 import { config } from './environment';
 
 export interface LiskConfig {
@@ -13,13 +12,16 @@ export const liskConfig: LiskConfig = {
   networkIdentifier: config.lisk.networkIdentifier
 };
 
+// Simplified Lisk client for hackathon - will implement full client later
 export const createLiskClient = async () => {
   try {
-    const client = await createWSClient(liskConfig.nodeUrl);
-    console.log('Lisk client connected successfully');
-    return client;
+    console.log('✅ Lisk configuration loaded successfully');
+    console.log(`🌐 Node URL: ${liskConfig.nodeUrl}`);
+    console.log(`🔗 Chain ID: ${liskConfig.chainId}`);
+    // TODO: Implement actual Lisk client connection in service layer
+    return { config: liskConfig };
   } catch (error) {
-    console.error('Failed to connect to Lisk node:', error);
+    console.error('❌ Failed to load Lisk configuration:', error);
     throw error;
   }
 };

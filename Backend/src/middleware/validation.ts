@@ -8,7 +8,7 @@ interface ValidationRule {
 }
 
 export const validationMiddleware = (rules: ValidationRule[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): void | Response => {
     const errors: string[] = [];
     
     rules.forEach(rule => {
