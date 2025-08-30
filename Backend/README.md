@@ -5,44 +5,44 @@ La idea es desarrollar una app que resuelva la actual problemática de desconfia
 lisk-trustpay/
 ├── src/
 │   ├── controllers/
-│   │   ├── authController.js
-│   │   ├── transactionController.js
-│   │   ├── escrowController.js
-│   │   ├── disputeController.js
-│   │   └── reputationController.js
+│   │   ├── authController.ts
+│   │   ├── transactionController.ts
+│   │   ├── escrowController.ts
+│   │   ├── disputeController.ts
+│   │   └── reputationController.ts
 │   ├── middleware/
-│   │   ├── auth.js
-│   │   ├── validation.js
-│   │   ├── rateLimit.js
-│   │   └── blockchain.js
+│   │   ├── auth.ts
+│   │   ├── validation.ts
+│   │   ├── rateLimit.ts
+│   │   └── blockchain.ts
 │   ├── models/
-│   │   ├── User.js
-│   │   ├── Transaction.js
-│   │   ├── Escrow.js
-│   │   └── Reputation.js
+│   │   ├── User.ts
+│   │   ├── Transaction.ts
+│   │   ├── Escrow.ts
+│   │   └── Reputation.ts
 │   ├── services/
-│   │   ├── liskService.js
-│   │   ├── escrowService.js
-│   │   ├── notificationService.js
-│   │   └── reputationService.js
+│   │   ├── liskService.ts
+│   │   ├── escrowService.ts
+│   │   ├── notificationService.ts
+│   │   └── reputationService.ts
 │   ├── contracts/ (Smart contracts para Lisk)
-│   │   ├── EscrowContract.js
-│   │   ├── ReputationContract.js
-│   │   └── DisputeContract.js
+│   │   ├── EscrowContract.ts
+│   │   ├── ReputationContract.ts
+│   │   └── DisputeContract.ts
 │   ├── routes/
-│   │   ├── auth.js
-│   │   ├── transactions.js
-│   │   ├── escrow.js
-│   │   └── api.js
+│   │   ├── auth.ts
+│   │   ├── transactions.ts
+│   │   ├── escrow.ts
+│   │   └── api.ts
 │   ├── utils/
-│   │   ├── crypto.js
-│   │   ├── validators.js
-│   │   └── helpers.js
-│   └── app.js
+│   │   ├── crypto.ts
+│   │   ├── validators.ts
+│   │   └── helpers.ts
+│   └── app.ts
 ├── config/
-│   ├── database.js
-│   ├── lisk.js
-│   └── environment.js
+│   ├── database.ts
+│   ├── lisk.ts
+│   └── environment.ts
 └── package.json
 
 Esta arquitectura está diseñada específicamente para abordar los problemas de confianza que mencionaste. Los aspectos clave que resuelven tu problemática son:
