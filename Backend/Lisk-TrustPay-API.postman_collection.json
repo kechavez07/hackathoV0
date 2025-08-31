@@ -1,0 +1,714 @@
+{
+  "info": {
+    "name": "Lisk TrustPay API - Hackathon",
+    "description": "API collection for Lisk TrustPay - Web3 Payment Gateway with Escrow System",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "escrow_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🏥 Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('jwt_token', response.data.token);",
+                  "    pm.environment.set('user_id', response.data.user.id);",
+                  "    console.log('JWT Token saved:', response.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"buyer@test.com\",\n  \"password\": \"password123\",\n  \"username\": \"buyer_test\",\n  \"liskAddress\": \"lsk24cd35u4jdq8szo4pnsqe5dsxwrnazyqqqg5eu\",\n  \"publicKey\": \"a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('jwt_token', response.data.token);",
+                  "    pm.environment.set('user_id', response.data.user.id);",
+                  "    console.log('JWT Token saved:', response.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"buyer@test.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get User Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update User Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+1234567890\",\n  \"bio\": \"Blockchain enthusiast and trader\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Get Wallet Info",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/wallet",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "wallet"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💰 Escrow System",
+      "item": [
+        {
+          "name": "Create Escrow",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('escrow_id', response.data.escrow.escrowId);",
+                  "    console.log('Escrow ID saved:', response.data.escrow.escrowId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sellerId\": \"SELLER_USER_ID_HERE\",\n  \"amount\": \"5000000000\",\n  \"description\": \"MacBook Pro 2023 - 16 inch, M2 Max, 32GB RAM\",\n  \"terms\": \"Product must be delivered within 5 business days. Buyer has 48 hours to confirm receipt and condition.\",\n  \"productInfo\": {\n    \"name\": \"MacBook Pro 2023\",\n    \"description\": \"16 inch MacBook Pro with M2 Max chip, 32GB RAM, 1TB SSD\",\n    \"category\": \"Electronics\",\n    \"images\": [\"https://example.com/macbook1.jpg\"]\n  },\n  \"deliveryInfo\": {\n    \"method\": \"Express Delivery\",\n    \"address\": \"123 Main St, City, Country\",\n    \"estimatedDelivery\": \"2024-09-05T00:00:00.000Z\"\n  },\n  \"autoReleaseHours\": 120\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/escrow",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "escrow"]
+            }
+          }
+        },
+        {
+          "name": "Get User Escrows",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/escrow?status=created&page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "escrow"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "created"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Specific Escrow",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/escrow/{{escrow_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "escrow", "{{escrow_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Fund Escrow",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/escrow/{{escrow_id}}/fund",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "escrow", "{{escrow_id}}", "fund"]
+            }
+          }
+        },
+        {
+          "name": "Release Escrow",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Product received in perfect condition. Transaction completed successfully.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/escrow/{{escrow_id}}/release",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "escrow", "{{escrow_id}}", "release"]
+            }
+          }
+        },
+        {
+          "name": "Add Message to Escrow",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Hi! I have a question about the delivery address. Can we arrange pickup instead?\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/escrow/{{escrow_id}}/message",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "escrow", "{{escrow_id}}", "message"]
+            }
+          }
+        },
+        {
+          "name": "Get Escrow Messages",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/escrow/{{escrow_id}}/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "escrow", "{{escrow_id}}", "messages"]
+            }
+          }
+        },
+        {
+          "name": "Get Escrow Statistics",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/escrow/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "escrow", "stats"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔧 Test Data Setup",
+      "item": [
+        {
+          "name": "Register Seller User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('seller_token', response.data.token);",
+                  "    pm.environment.set('seller_id', response.data.user.id);",
+                  "    console.log('Seller ID saved:', response.data.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"seller@test.com\",\n  \"password\": \"password123\",\n  \"username\": \"seller_test\",\n  \"liskAddress\": \"lsk8f2pzqpkq7sj8f2pzqpkq7sj8f2pzqpkq7sj8f2\",\n  \"publicKey\": \"b14ca5898a4e4133bbce2ea2315a1916e75f6b65532e2333b87c5c7c2f7a27ae\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "register"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 Sample Workflows",
+      "item": [
+        {
+          "name": "Complete Escrow Flow",
+          "item": [
+            {
+              "name": "1. Buyer Login",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    pm.environment.set('buyer_token', response.data.token);",
+                      "    pm.environment.set('buyer_id', response.data.user.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"buyer@test.com\",\n  \"password\": \"password123\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/auth/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "auth", "login"]
+                }
+              }
+            },
+            {
+              "name": "2. Create Escrow",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    const response = pm.response.json();",
+                      "    pm.environment.set('escrow_id', response.data.escrow.escrowId);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{buyer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sellerId\": \"{{seller_id}}\",\n  \"amount\": \"1000000000\",\n  \"description\": \"iPhone 15 Pro Max - 256GB, Space Black\",\n  \"terms\": \"Phone must be unlocked, in original packaging with all accessories. 7-day return policy.\",\n  \"productInfo\": {\n    \"name\": \"iPhone 15 Pro Max\",\n    \"description\": \"Latest iPhone with 256GB storage in Space Black color\",\n    \"category\": \"Smartphones\"\n  },\n  \"autoReleaseHours\": 72\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/escrow",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "escrow"]
+                }
+              }
+            },
+            {
+              "name": "3. Fund Escrow",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{buyer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/escrow/{{escrow_id}}/fund",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "escrow", "{{escrow_id}}", "fund"]
+                }
+              }
+            },
+            {
+              "name": "4. Add Communication",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{buyer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"message\": \"Payment sent! Please proceed with shipping. I'll confirm once received.\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/escrow/{{escrow_id}}/message",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "escrow", "{{escrow_id}}", "message"]
+                }
+              }
+            },
+            {
+              "name": "5. Release Escrow",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{buyer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"iPhone received in perfect condition with all accessories. Great seller!\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/escrow/{{escrow_id}}/release",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "escrow", "{{escrow_id}}", "release"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
