@@ -1,56 +1,22 @@
 "use client"
 
-import { useState } from "react"
-import { PaymentHeader } from "@/components/payment-header"
-import { PaymentForm } from "@/components/payment-form"
-import { PaymentFooter } from "@/components/payment-footer"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 
-export default function PaymentPage() {
-  const [state, setState] = useState({
-    amount: 123.45,
-    currency: "USD",
-    web3: {
-      connected: false,
-      chain: "Ethereum",
-      token: "USDC",
-      address: "",
-      txHash: "",
-      signDelivery: true,
-    },
-    loading: {
-      wallet: false,
-      crypto: false,
-    },
-  })
+export default function HomePage() {
+  const router = useRouter()
 
-  const updateState = (path: string, value: any) => {
-    setState((prev) => {
-      const keys = path.split(".")
-      const newState = { ...prev } as any
-      let current = newState
+  useEffect(() => {
+    // Redirigir automáticamente al login al cargar la página
+    router.replace("/login")
+  }, [router])
 
-      for (let i = 0; i < keys.length - 1; i++) {
-        current[keys[i]] = { ...current[keys[i]] }
-        current = current[keys[i]]
-      }
-
-      current[keys[keys.length - 1]] = value
-      return newState
-    })
-  }
-
+  // Mostrar una pantalla de carga mientras redirige
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#162936" }}>
-      <div className="max-w-[980px] mx-auto">
-        <PaymentHeader />
-
-        <div className="p-6">
-          <div className="max-w-md mx-auto">
-            <PaymentForm state={state} updateState={updateState} />
-          </div>
-        </div>
-
-        <PaymentFooter />
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#162936" }}>
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#27e9b5] mx-auto mb-4"></div>
+        <p className="text-white">Redirecting to login...</p>
       </div>
     </div>
   )
