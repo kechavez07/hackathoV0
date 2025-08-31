@@ -2,22 +2,13 @@
 
 import { useState } from "react"
 import { PaymentHeader } from "@/components/payment-header"
-import { PaymentCardPreview } from "@/components/payment-card-preview"
 import { PaymentForm } from "@/components/payment-form"
 import { PaymentFooter } from "@/components/payment-footer"
 
 export default function PaymentPage() {
   const [state, setState] = useState({
-    ui: { method: "card" },
     amount: 123.45,
     currency: "USD",
-    card: {
-      name: "",
-      number: "",
-      expMonth: "",
-      expYear: "",
-      cvv: "",
-    },
     web3: {
       connected: false,
       chain: "Ethereum",
@@ -27,7 +18,6 @@ export default function PaymentPage() {
       signDelivery: true,
     },
     loading: {
-      card: false,
       wallet: false,
       crypto: false,
     },
@@ -36,7 +26,7 @@ export default function PaymentPage() {
   const updateState = (path: string, value: any) => {
     setState((prev) => {
       const keys = path.split(".")
-      const newState = { ...prev }
+      const newState = { ...prev } as any
       let current = newState
 
       for (let i = 0; i < keys.length - 1; i++) {
@@ -54,17 +44,8 @@ export default function PaymentPage() {
       <div className="max-w-[980px] mx-auto">
         <PaymentHeader />
 
-        <div className="grid lg:grid-cols-2 gap-8 p-6">
-          <div className="order-2 lg:order-1">
-            <PaymentCardPreview
-              cardholder={state.card.name || "CARDHOLDER NAME"}
-              number={state.card.number || "1234 5678 9012 3456"}
-              expMonth={state.card.expMonth || "08"}
-              expYear={state.card.expYear || "24"}
-            />
-          </div>
-
-          <div className="order-1 lg:order-2">
+        <div className="p-6">
+          <div className="max-w-md mx-auto">
             <PaymentForm state={state} updateState={updateState} />
           </div>
         </div>
