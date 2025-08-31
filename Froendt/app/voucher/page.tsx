@@ -7,13 +7,21 @@ type Search = Record<string, string | string[] | undefined>
 
 export default async function VoucherPage({ searchParams }: { searchParams: Search }) {
   const amount = (searchParams.amount as string) ?? "0.00"
-  const currency = (searchParams.currency as string) ?? "USD"
-  const txId = (searchParams.id as string) ?? randomUUID()
+  const currency = (searchParams.currency as string) ?? "LSK"
+  const escrowId = (searchParams.escrowId as string) ?? randomUUID()
   const ts = Date.now()
   const expiresAt = Number(searchParams.expiresAt ?? ts + 15 * 60 * 1000) // +15min
 
   // Payload que tu wallet/validador puede leer (ajústalo cuando tengas backend real)
-  const payload = JSON.stringify({ txId, amount, currency, expiresAt, ts, source: "PayGateOmni" })
+  const payload = JSON.stringify({ 
+    escrowId, 
+    amount, 
+    currency, 
+    expiresAt, 
+    ts, 
+    source: "PayGateOmni",
+    action: "pay_escrow"
+  })
 
   const qrDataUrl = await QRCode.toDataURL(payload, {
     errorCorrectionLevel: "M",
@@ -27,7 +35,7 @@ export default async function VoucherPage({ searchParams }: { searchParams: Sear
         <VoucherCard
           amount={amount}
           currency={currency}
-          txId={txId}
+          txId={escrowId}
           qrDataUrl={qrDataUrl}
           expiresAt={expiresAt}
         />

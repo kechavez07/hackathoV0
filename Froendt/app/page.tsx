@@ -10,12 +10,14 @@ export default function PaymentPage() {
     amount: 123.45,
     currency: "USD",
     web3: {
-      connected: false,
-      chain: "Ethereum",
-      token: "USDC",
-      address: "",
-      txHash: "",
+      connected: true, // Mock: wallet ya conectada
+      liskAddress: "lsk1234567890abcdef", // Mock: dirección Lisk
+      sellerId: "seller123", // Mock: ID del vendedor
       signDelivery: true,
+    },
+    order: {
+      description: "Payment via TrustPay",
+      terms: "Buyer will release after delivery confirmation.",
     },
     loading: {
       wallet: false,

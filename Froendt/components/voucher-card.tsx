@@ -1,99 +1,108 @@
 // components/voucher-card.tsx
 "use client"
 
-import { useEffect, useState } from "react"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Copy, Check, Printer, QrCode } from "lucide-react"
+import { Copy, Download, QrCode } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
-export default function VoucherCard({
-  amount,
-  currency,
-  txId,
-  qrDataUrl,
-  expiresAt,
-}: {
+interface VoucherCardProps {
   amount: string
   currency: string
   txId: string
   qrDataUrl: string
   expiresAt: number
-}) {
-  const [now, setNow] = useState(Date.now())
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(id)
-  }, [])
-  const remaining = Math.max(0, Math.floor((expiresAt - now) / 1000))
-  const mm = String(Math.floor(remaining / 60)).padStart(2, "0")
-  const ss = String(remaining % 60).padStart(2, "0")
+}
 
-  const [copied, setCopied] = useState(false)
-  const copy = async () => {
-    await navigator.clipboard.writeText(txId)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1200)
+export default function VoucherCard({ amount, currency, txId, qrDataUrl, expiresAt }: VoucherCardProps) {
+  const { toast } = useToast()
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+    toast({
+      title: "Copied!",
+      description: "Transaction ID copied to clipboard",
+      variant: "default",
+    })
   }
-  const onPrint = () => window.print()
 
-  const fmtAmount = (() => {
-    const n = Number(amount)
-    if (Number.isFinite(n)) return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-    return amount
-  })()
+  const downloadQR = () => {
+    const link = document.createElement('a')
+    link.href = qrDataUrl
+    link.download = `payment-qr-${txId}.png`
+    link.click()
+  }
+
+  const formatExpiry = (timestamp: number) => {
+    return new Date(timestamp).toLocaleString()
+  }
 
   return (
-    <Card className="mx-auto max-w-2xl border-gray-700 shadow-2xl rounded-2xl" style={{ backgroundColor: "#051824" }}>
-      <CardHeader className="pt-8 pb-4">
-        <CardTitle className="flex items-center justify-between">
-          <span className="text-white text-xl">Payment voucher</span>
-          <span className="text-sm text-gray-400">expira en {mm}:{ss}</span>
+    <Card className="border-gray-700 mx-auto max-w-md" style={{ backgroundColor: "#051824" }}>
+      <CardHeader>
+        <CardTitle className="text-white flex items-center gap-2">
+          <QrCode className="w-5 h-5" />
+          Payment Voucher
         </CardTitle>
       </CardHeader>
-
-      <CardContent className="grid md:grid-cols-2 gap-6 items-center">
-        <div className="flex items-center justify-center rounded-xl p-4" style={{ backgroundColor: "#0a2432" }}>
-          <img src={qrDataUrl} alt="Payment QR" className="w-64 h-64" />
+      <CardContent className="space-y-6">
+        {/* QR Code */}
+        <div className="flex justify-center">
+          <div className="p-4 bg-white rounded-lg">
+            <img src={qrDataUrl} alt="Payment QR Code" className="w-48 h-48" />
+          </div>
         </div>
 
+        {/* Payment Details */}
         <div className="space-y-4">
-          <div className="flex justify-between">
-            <span className="text-gray-400">Transaction ID</span>
-            <div className="flex items-center gap-2">
-              <span className="text-white font-mono">{txId.slice(0, 8)}…{txId.slice(-6)}</span>
-              <Button size="sm" onClick={copy} className="bg-[#27e9b5] hover:bg-[#20c49a] text-black">
-                {copied ? <Check className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />}
-                {copied ? "Copiado" : "Copiar"}
-              </Button>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-white">
+              {amount} {currency}
+            </div>
+            <div className="text-sm text-gray-400">Payment Amount</div>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <div className="text-sm text-gray-400">Transaction ID</div>
+              <div className="flex items-center gap-2">
+                <code className="text-xs text-gray-300 bg-gray-800 px-2 py-1 rounded flex-1">
+                  {txId}
+                </code>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => copyToClipboard(txId)}
+                  className="border-gray-600 text-gray-300 hover:bg-gray-800"
+                >
+                  <Copy className="w-3 h-3" />
+                </Button>
+              </div>
+            </div>
+
+            <div>
+              <div className="text-sm text-gray-400">Expires At</div>
+              <div className="text-sm text-gray-300">{formatExpiry(expiresAt)}</div>
             </div>
           </div>
+        </div>
 
-          <div className="flex justify-between">
-            <span className="text-gray-400">Amount</span>
-            <span className="text-[#27e9b5] font-semibold">{currency} {fmtAmount}</span>
+        {/* Actions */}
+        <div className="space-y-3">
+          <Button
+            onClick={downloadQR}
+            variant="outline"
+            className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download QR Code
+          </Button>
+
+          <div className="text-xs text-gray-400 text-center">
+            Scan this QR code with your Lisk wallet to complete the payment
           </div>
-
-          <div className="flex justify-between">
-            <span className="text-gray-400">Status</span>
-            <span className="text-yellow-300">pending</span>
-          </div>
-
-          <p className="text-xs text-gray-400 pt-2">
-            Escanea este QR con tu wallet para confirmar el pago. Conserva este comprobante.
-          </p>
         </div>
       </CardContent>
-
-      <CardFooter className="flex justify-end gap-3 pb-8">
-        <Button onClick={onPrint} variant="outline" className="border-gray-600 text-white">
-          <Printer className="w-4 h-4 mr-2" /> Imprimir
-        </Button>
-        <a href={qrDataUrl} download={`voucher-${txId}.png`}>
-          <Button className="bg-[#27e9b5] hover:bg-[#20c49a] text-black">
-            <QrCode className="w-4 h-4 mr-2" /> Descargar QR
-          </Button>
-        </a>
-      </CardFooter>
     </Card>
   )
 }
