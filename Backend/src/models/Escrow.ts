@@ -128,13 +128,8 @@ const EscrowSchema: Schema<IEscrow> = new Schema({
   },
   contractAddress: {
     type: String,
-    required: [true, 'Contract address is required'],
-    validate: {
-      validator: function(v: string) {
-        return /^lsk[a-z2-9]{38}$/.test(v);
-      },
-      message: 'Invalid contract address format'
-    }
+    required: [true, 'Contract address is required']
+    // Validación relajada para hackathon
   },
   liskTransactionId: {
     type: String,

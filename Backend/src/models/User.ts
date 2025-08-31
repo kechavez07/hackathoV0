@@ -53,23 +53,13 @@ const UserSchema: Schema<IUser> = new Schema({
   liskAddress: {
     type: String,
     required: [true, 'Lisk address is required'],
-    unique: true,
-    validate: {
-      validator: function(v: string) {
-        return /^lsk[a-z2-9]{38}$/.test(v);
-      },
-      message: 'Invalid Lisk address format'
-    }
+    unique: true
+    // Validación relajada para hackathon - cualquier address funciona
   },
   publicKey: {
     type: String,
-    required: [true, 'Public key is required'],
-    validate: {
-      validator: function(v: string) {
-        return /^[a-f0-9]{64}$/.test(v);
-      },
-      message: 'Invalid public key format'
-    }
+    required: [true, 'Public key is required']
+    // Validación relajada para hackathon - cualquier key funciona
   },
   reputationScore: {
     type: Number,
