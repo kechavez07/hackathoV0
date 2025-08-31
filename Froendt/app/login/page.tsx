@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast"
 export default function LoginPage() {
   const router = useRouter()
   const params = useSearchParams()
-  const next = params.get("next") || "/"
+  const next = params.get("next") || "/dashboard"
   const { toast } = useToast()
 
   const [showPwd, setShowPwd] = useState(false)

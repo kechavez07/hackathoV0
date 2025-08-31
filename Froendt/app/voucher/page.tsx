@@ -6,11 +6,12 @@ import VoucherCard from "@/components/voucher-card"
 type Search = Record<string, string | string[] | undefined>
 
 export default async function VoucherPage({ searchParams }: { searchParams: Search }) {
-  const amount = (searchParams.amount as string) ?? "0.00"
-  const currency = (searchParams.currency as string) ?? "LSK"
-  const escrowId = (searchParams.escrowId as string) ?? randomUUID()
+  const params = await searchParams
+  const amount = (params.amount as string) ?? "0.00"
+  const currency = (params.currency as string) ?? "LSK"
+  const escrowId = (params.escrowId as string) ?? randomUUID()
   const ts = Date.now()
-  const expiresAt = Number(searchParams.expiresAt ?? ts + 15 * 60 * 1000) // +15min
+  const expiresAt = Number(params.expiresAt ?? ts + 15 * 60 * 1000) // +15min
 
   // Payload que tu wallet/validador puede leer (ajústalo cuando tengas backend real)
   const payload = JSON.stringify({ 
