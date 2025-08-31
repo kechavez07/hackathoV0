@@ -82,21 +82,21 @@ graph LR
 
 ```mermaid
 sequenceDiagram
-    participant B as Comprador
-    participant S as Sistema
-    participant V as Vendedor
+    participant B as Buyer
+    participant S as System
+    participant V as Seller
     participant BC as Blockchain
 
-    B->>S: 1. Crear Escrow
+    B->>S: 1. Create Escrow
     S->>BC: 2. Deploy Smart Contract
-    S->>V: 3. Notificar Nuevo Escrow
-    B->>S: 4. Financiar Escrow
-    S->>BC: 5. Bloquear Fondos
-    V->>S: 6. Confirmar Recepción
-    V->>B: 7. Procesar/Enviar Producto
-    B->>S: 8. Confirmar Recepción
-    S->>BC: 9. Liberar Fondos
-    S->>V: 10. Transferir Pago
+    S->>V: 3. Notify New Escrow
+    B->>S: 4. Fund Escrow
+    S->>BC: 5. Lock Funds
+    V->>S: 6. Confirm Reception
+    V->>B: 7. Process/Send Product
+    B->>S: 8. Confirm Reception
+    S->>BC: 9. Release Funds
+    S->>V: 10. Transfer Payment
 ```
 
 **2.1 Creación de Escrow**
