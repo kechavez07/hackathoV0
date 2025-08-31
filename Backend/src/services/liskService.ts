@@ -212,11 +212,10 @@ export class LiskService {
 
   public async validateAddress(address: string): Promise<boolean> {
     try {
-      // Validate Lisk address format: lsk + 38 characters
-      const liskAddressRegex = /^lsk[a-z2-9]{38}$/;
-      const isValid = liskAddressRegex.test(address);
+      // Para hackathon - aceptar cualquier address que no esté vacío
+      const isValid = address && address.length > 0;
       
-      console.log(`🔍 Address ${address} is ${isValid ? 'valid' : 'invalid'}`);
+      console.log(`🔍 Address ${address} is ${isValid ? 'valid' : 'invalid'} (hackathon mode)`);
       return isValid;
       
     } catch (error) {

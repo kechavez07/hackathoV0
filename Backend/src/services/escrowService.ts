@@ -65,8 +65,8 @@ export class EscrowService {
       // Generate unique escrow ID
       const escrowId = `ESC_${this.generateShortId()}`;
 
-      // Create mock contract address (in real implementation, this would be deployed to Lisk)
-      const contractAddress = `lsk${this.generateShortId().toLowerCase()}${'0'.repeat(30)}`;
+      // Create mock contract address
+      const contractAddress = `contract-${this.generateShortId().toLowerCase()}`;
 
       // Set expiration time
       const expiresAt = data.autoReleaseHours ? 
@@ -102,57 +102,7 @@ export class EscrowService {
       });
 
       await escrow.save();
-
-      // Create blockchain transaction for escrow creation
-      try {
-        const liskTx = await liskService.createEscrowTransaction(
-          buyer.liskAddress,
-          buyer.publicKey,
-          {
-            amount: data.amount,
-            recipientAddress: seller.liskAddress,
-            description: data.description,
-            terms: data.terms,
-            escrowId
-          },
-          '0' // Mock nonce
-        );
-
-        // Submit transaction to Lisk network
-        const txHash = await liskService.submitTransaction(liskTx);
-
-        // Record transaction
-        const transaction = new Transaction({
-          txHash,
-          type: TransactionType.ESCROW_CREATE,
-          status: TransactionStatus.PENDING,
-          amount: data.amount,
-          fee: fee.toString(),
-          sender: data.buyerId,
-          recipient: data.sellerId,
-          escrowId: escrow._id,
-          metadata: {
-            description: `Escrow creation: ${data.description}`,
-            contractAddress
-          },
-          liskData: {
-            moduleID: liskTx.moduleID,
-            assetID: liskTx.assetID,
-            nonce: liskTx.nonce,
-            senderPublicKey: liskTx.senderPublicKey,
-            signatures: liskTx.signatures
-          }
-        });
-
-        await transaction.save();
-        escrow.liskTransactionId = txHash;
-        await escrow.save();
-
-        console.log(`✅ Escrow created successfully: ${escrowId} (TX: ${txHash})`);
-        
-      } catch (blockchainError) {
-        console.error('⚠️ Blockchain transaction failed, escrow created in pending state:', blockchainError);
-      }
+      console.log(`✅ Escrow created successfully: ${escrowId}`);
 
       return escrow;
 
@@ -216,56 +166,18 @@ export class EscrowService {
         throw new Error('Only buyer or seller can release escrow');
       }
 
-      // Create blockchain transaction for escrow release
-      try {
-        const liskTx = await liskService.releaseEscrowTransaction(
-          user.liskAddress,
-          user.publicKey,
-          data.escrowId,
-          '1' // Mock nonce
-        );
+      // Simulate blockchain transaction (simplified for hackathon)
+      console.log(`🔗 Simulating blockchain release for escrow: ${data.escrowId}`);
+      
+      // Update escrow status
+      escrow.status = EscrowStatus.COMPLETED;
+      escrow.timeline.completedAt = new Date();
+      await escrow.save();
 
-        const txHash = await liskService.submitTransaction(liskTx);
+      // Update user transaction stats
+      await this.updateUserTransactionStats(escrow.buyer._id.toString(), escrow.seller._id.toString(), true);
 
-        // Record release transaction
-        const transaction = new Transaction({
-          txHash,
-          type: TransactionType.ESCROW_RELEASE,
-          status: TransactionStatus.PENDING,
-          amount: escrow.amount,
-          fee: await liskService.estimateFee(liskTx.assetID),
-          sender: data.releasedBy,
-          recipient: isBuyer ? escrow.seller._id : escrow.buyer._id,
-          escrowId: escrow._id,
-          metadata: {
-            description: `Escrow release: ${data.reason || 'Transaction completed'}`,
-            releasedBy: isBuyer ? 'buyer' : 'seller'
-          },
-          liskData: {
-            moduleID: liskTx.moduleID,
-            assetID: liskTx.assetID,
-            nonce: liskTx.nonce,
-            senderPublicKey: liskTx.senderPublicKey,
-            signatures: liskTx.signatures
-          }
-        });
-
-        await transaction.save();
-
-        // Update escrow status
-        escrow.status = EscrowStatus.COMPLETED;
-        escrow.timeline.completedAt = new Date();
-        await escrow.save();
-
-        // Update user transaction counts
-        await this.updateUserTransactionStats(escrow.buyer._id.toString(), escrow.seller._id.toString(), true);
-
-        console.log(`🔓 Escrow released successfully: ${data.escrowId} by ${isBuyer ? 'buyer' : 'seller'}`);
-        
-      } catch (blockchainError) {
-        console.error('⚠️ Blockchain release failed:', blockchainError);
-        throw new Error('Failed to release escrow on blockchain');
-      }
+      console.log(`🔓 Escrow released successfully: ${data.escrowId} by ${isBuyer ? 'buyer' : 'seller'}`);
 
       return escrow;
 

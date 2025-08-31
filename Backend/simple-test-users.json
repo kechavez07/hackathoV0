@@ -1,0 +1,23 @@
+{
+  "maria_vendedor": {
+    "email": "maria@test.com",
+    "password": "password123",
+    "username": "maria_seller",
+    "liskAddress": "maria-wallet-address-123",
+    "publicKey": "maria-public-key-456"
+  },
+  "juan_comprador": {
+    "email": "juan@test.com", 
+    "password": "password123",
+    "username": "juan_buyer",
+    "liskAddress": "juan-wallet-address-789",
+    "publicKey": "juan-public-key-abc"
+  },
+  "escrow_macbook": {
+    "sellerId": "MARIA_USER_ID_AQUI",
+    "amount": "250000000000",
+    "description": "MacBook Pro 2023 - Como nuevo, con cargador",
+    "terms": "Entrega en 3 días. Garantía 30 días.",
+    "autoReleaseHours": 72
+  }
+}
