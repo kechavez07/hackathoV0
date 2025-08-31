@@ -1,15 +1,17 @@
 import { Check } from "lucide-react"
+import { Button } from "./ui/button"
+import { useRouter } from "next/navigation"
 
 export function PaymentHeader() {
   const steps = ["Main", "Shipping details", "Payment method"]
   const activeStep = "Payment method"
-
+  const router = useRouter()
   return (
     <header className="border-b border-gray-700 p-6" style={{ backgroundColor: "#051824" }}>
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-8">
           <h1 className="text-2xl font-bold text-white">PayGate</h1>
-
+          
           <div className="flex items-center space-x-4">
             {steps.map((step, index) => {
               const isActive = step === activeStep
@@ -34,6 +36,16 @@ export function PaymentHeader() {
               )
             })}
           </div>
+            
+          <Button onClick={() => {
+            fetch("/api/auth/logout").then(() => {
+              router.push("/login")
+            }).catch((error) => {
+              console.error("Error logging out:", error)
+            })
+          }}>
+            Logout
+          </Button>
         </div>
       </div>
     </header>

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { User, IUser } from '../models/User';
-import { Reputation } from '../models/Reputation';
+import { ReputationSummary } from '../models/Reputation';
 import { config } from '../config/environment';
 import { liskService } from '../services/liskService';
 
@@ -51,8 +51,8 @@ export const register = async (req: Request, res: Response) => {
     await user.save();
 
     // Create reputation profile for new user
-    const reputation = new Reputation({
-      user: user._id
+    const reputation = new ReputationSummary({
+      userId: user._id
     });
     await reputation.save();
 
@@ -198,7 +198,7 @@ export const getProfile = async (req: Request, res: Response) => {
     }
 
     // Get user's reputation data
-    const reputation = await Reputation.findOne({ user: userId });
+    const reputation = await ReputationSummary.findOne({ userId: userId });
 
     // Get fresh blockchain account info
     let accountInfo;
@@ -227,14 +227,12 @@ export const getProfile = async (req: Request, res: Response) => {
           createdAt: user.createdAt
         },
         reputation: reputation ? {
-          currentScore: reputation.currentScore,
+          averageRating: reputation.averageRating,
+          totalRatings: reputation.totalRatings,
           level: reputation.level,
-          historicalHighScore: reputation.historicalHighScore,
-          historicalLowScore: reputation.historicalLowScore,
-          stats: reputation.stats,
-          trustMetrics: reputation.trustMetrics,
-          verifications: reputation.verifications,
-          achievements: reputation.achievements
+          ratingBreakdown: reputation.ratingBreakdown,
+          asBuyer: reputation.asBuyer,
+          asSeller: reputation.asSeller
         } : null,
         blockchain: {
           network: liskService.getNetworkInfo(),

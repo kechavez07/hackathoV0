@@ -1,10 +1,8 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CardPane } from "@/components/card-pane"
 import { CryptoPane } from "@/components/crypto-pane"
-import { CreditCard, Wallet } from "lucide-react"
+import { Wallet } from "lucide-react"
 
 interface PaymentFormProps {
   state: any
@@ -15,35 +13,13 @@ export function PaymentForm({ state, updateState }: PaymentFormProps) {
   return (
     <Card className="border-gray-700" style={{ backgroundColor: "#051824" }}>
       <CardHeader>
-        <CardTitle className="text-white">Payment details</CardTitle>
+        <CardTitle className="text-white flex items-center gap-2">
+          <Wallet className="w-5 h-5" />
+          Crypto Payment
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs value={state.ui.method} onValueChange={(value) => updateState("ui.method", value)} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-gray-800">
-            <TabsTrigger
-              value="card"
-              className="flex items-center gap-2 data-[state=active]:bg-[#27e9b5] data-[state=active]:text-black"
-            >
-              <CreditCard className="w-4 h-4" />
-              Credit / Debit Card
-            </TabsTrigger>
-            <TabsTrigger
-              value="crypto"
-              className="flex items-center gap-2 data-[state=active]:bg-[#27e9b5] data-[state=active]:text-black"
-            >
-              <Wallet className="w-4 h-4" />
-              Crypto / Web3
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="card" className="mt-6">
-            <CardPane state={state} updateState={updateState} />
-          </TabsContent>
-
-          <TabsContent value="crypto" className="mt-6">
-            <CryptoPane state={state} updateState={updateState} />
-          </TabsContent>
-        </Tabs>
+        <CryptoPane state={state} updateState={updateState} />
       </CardContent>
     </Card>
   )
