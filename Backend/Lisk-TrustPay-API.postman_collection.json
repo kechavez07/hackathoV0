@@ -38,7 +38,7 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost:3001",
+      "value": "http://localhost:3000",
       "type": "string"
     },
     {
@@ -53,6 +53,31 @@
     },
     {
       "key": "escrow_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "dispute_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "seller_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "seller_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "buyer_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "buyer_id",
       "value": "",
       "type": "string"
     }
@@ -494,6 +519,384 @@
       ]
     },
     {
+      "name": "⭐ Reputation System",
+      "item": [
+        {
+          "name": "Create Rating",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"escrowId\": \"{{escrow_id}}\",\n  \"rated\": \"{{seller_id}}\",\n  \"score\": 5,\n  \"comment\": \"Excellent seller! Product exactly as described, fast shipping, great communication. Highly recommended!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/reputation/rate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "reputation", "rate"]
+            }
+          }
+        },
+        {
+          "name": "Get User Reputation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reputation/{{seller_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "reputation", "{{seller_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Rating History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reputation/{{seller_id}}/history?limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "reputation", "{{seller_id}}", "history"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Escrow Ratings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reputation/escrow/{{escrow_id}}/ratings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "reputation", "escrow", "{{escrow_id}}", "ratings"]
+            }
+          }
+        },
+        {
+          "name": "Check Can Rate Escrow",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{buyer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reputation/escrow/{{escrow_id}}/can-rate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "reputation", "escrow", "{{escrow_id}}", "can-rate"]
+            }
+          }
+        },
+        {
+          "name": "Get My Ratings",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/reputation/my/ratings?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "reputation", "my", "ratings"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "⚖️ Dispute System",
+      "item": [
+        {
+          "name": "Get Dispute Types",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dispute/types/all",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dispute", "types", "all"]
+            }
+          }
+        },
+        {
+          "name": "Check Can Create Dispute",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{buyer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dispute/escrow/{{escrow_id}}/can-create",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dispute", "escrow", "{{escrow_id}}", "can-create"]
+            }
+          }
+        },
+        {
+          "name": "Create Dispute",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('dispute_id', response.data.dispute.disputeId);",
+                  "    console.log('Dispute ID saved:', response.data.dispute.disputeId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{buyer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"escrowId\": \"{{escrow_id}}\",\n  \"type\": \"delivery_issue\",\n  \"subject\": \"Product not delivered after 7 days\",\n  \"description\": \"I placed an order 7 days ago and paid through escrow, but the product has not been delivered yet. The seller is not responding to my messages. I would like to request a refund or get clarity on when the product will arrive.\",\n  \"evidence\": {\n    \"files\": [\"https://example.com/screenshot1.png\"],\n    \"screenshots\": [\"https://example.com/chat-screenshot.png\"],\n    \"notes\": \"Screenshots show no response from seller for 3 days\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dispute/create",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dispute", "create"]
+            }
+          }
+        },
+        {
+          "name": "Get Dispute Details",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{buyer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dispute/{{dispute_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dispute", "{{dispute_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get My Disputes",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dispute/my/all?status=open",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dispute", "my", "all"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "open"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Escrow Disputes",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dispute/escrow/{{escrow_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dispute", "escrow", "{{escrow_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Add Message to Dispute",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{seller_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"I apologize for the delay. There was an issue with the shipping company. I've contacted them and your package should arrive tomorrow. Here's the tracking number: ABC123456789.\",\n  \"attachments\": [\"https://example.com/tracking-screenshot.png\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dispute/{{dispute_id}}/message",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dispute", "{{dispute_id}}", "message"]
+            }
+          }
+        },
+        {
+          "name": "Escalate Dispute",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{buyer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Seller is not cooperating and the tracking number provided is invalid. I need admin intervention to resolve this issue.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dispute/{{dispute_id}}/escalate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dispute", "{{dispute_id}}", "escalate"]
+            }
+          }
+        },
+        {
+          "name": "Resolve Dispute",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resolutionType\": \"favor_buyer\",\n  \"description\": \"After investigation, the seller failed to provide valid tracking information and the product was never shipped. Full refund approved for the buyer.\",\n  \"refundAmount\": \"1000000000\",\n  \"additionalTerms\": \"Buyer will receive full refund within 24 hours. Seller will be flagged for review.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dispute/{{dispute_id}}/resolve",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dispute", "{{dispute_id}}", "resolve"]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "🔧 Test Data Setup",
       "item": [
         {
@@ -703,6 +1106,403 @@
                   "raw": "{{base_url}}/api/v1/escrow/{{escrow_id}}/release",
                   "host": ["{{base_url}}"],
                   "path": ["api", "v1", "escrow", "{{escrow_id}}", "release"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Complete Flow with Rating",
+          "item": [
+            {
+              "name": "1. Setup - Register Seller",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    const response = pm.response.json();",
+                      "    pm.environment.set('seller_token', response.data.token);",
+                      "    pm.environment.set('seller_id', response.data.user.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"seller@demo.com\",\n  \"password\": \"password123\",\n  \"username\": \"demo_seller\",\n  \"liskAddress\": \"lsk8f2pzqpkq7sj8f2pzqpkq7sj8f2pzqpkq7sj8f2\",\n  \"publicKey\": \"b14ca5898a4e4133bbce2ea2315a1916e75f6b65532e2333b87c5c7c2f7a27ae\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/auth/register",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "auth", "register"]
+                }
+              }
+            },
+            {
+              "name": "2. Setup - Register Buyer",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    const response = pm.response.json();",
+                      "    pm.environment.set('buyer_token', response.data.token);",
+                      "    pm.environment.set('buyer_id', response.data.user.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"buyer@demo.com\",\n  \"password\": \"password123\",\n  \"username\": \"demo_buyer\",\n  \"liskAddress\": \"lsk24cd35u4jdq8szo4pnsqe5dsxwrnazyqqqg5eu\",\n  \"publicKey\": \"a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/auth/register",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "auth", "register"]
+                }
+              }
+            },
+            {
+              "name": "3. Create Escrow",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    const response = pm.response.json();",
+                      "    pm.environment.set('demo_escrow_id', response.data.escrow.escrowId);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{buyer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sellerId\": \"{{seller_id}}\",\n  \"amount\": \"500000000\",\n  \"description\": \"Demo Product - Gaming Headset\",\n  \"terms\": \"Product delivery within 3 days. 48h confirmation period.\",\n  \"productInfo\": {\n    \"name\": \"Gaming Headset Pro\",\n    \"description\": \"High-quality gaming headset with noise cancellation\",\n    \"category\": \"Electronics\"\n  },\n  \"autoReleaseHours\": 72\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/escrow",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "escrow"]
+                }
+              }
+            },
+            {
+              "name": "4. Fund Escrow",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{buyer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/escrow/{{demo_escrow_id}}/fund",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "escrow", "{{demo_escrow_id}}", "fund"]
+                }
+              }
+            },
+            {
+              "name": "5. Release Escrow",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{buyer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Product received in excellent condition! Fast delivery and great communication.\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/escrow/{{demo_escrow_id}}/release",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "escrow", "{{demo_escrow_id}}", "release"]
+                }
+              }
+            },
+            {
+              "name": "6. Rate Seller",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{buyer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"escrowId\": \"{{demo_escrow_id}}\",\n  \"rated\": \"{{seller_id}}\",\n  \"score\": 5,\n  \"comment\": \"Amazing seller! Product was exactly as described, shipping was super fast, and communication was excellent throughout the process. Will definitely buy from again!\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/reputation/rate",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "reputation", "rate"]
+                }
+              }
+            },
+            {
+              "name": "7. Check Seller Reputation",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/reputation/{{seller_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "reputation", "{{seller_id}}"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dispute Flow Demo",
+          "item": [
+            {
+              "name": "1. Create Escrow for Dispute",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    const response = pm.response.json();",
+                      "    pm.environment.set('dispute_escrow_id', response.data.escrow.escrowId);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{buyer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sellerId\": \"{{seller_id}}\",\n  \"amount\": \"2000000000\",\n  \"description\": \"Laptop for Dispute Demo\",\n  \"terms\": \"Delivery within 5 business days\",\n  \"autoReleaseHours\": 120\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/escrow",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "escrow"]
+                }
+              }
+            },
+            {
+              "name": "2. Fund Dispute Escrow",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{buyer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/escrow/{{dispute_escrow_id}}/fund",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "escrow", "{{dispute_escrow_id}}", "fund"]
+                }
+              }
+            },
+            {
+              "name": "3. Create Dispute",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    const response = pm.response.json();",
+                      "    pm.environment.set('demo_dispute_id', response.data.dispute.disputeId);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{buyer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"escrowId\": \"{{dispute_escrow_id}}\",\n  \"type\": \"delivery_issue\",\n  \"subject\": \"Product not delivered - Demo Dispute\",\n  \"description\": \"This is a demo dispute. The product was supposed to be delivered 3 days ago but I haven't received it yet. Seller is not responding to my messages.\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/dispute/create",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "dispute", "create"]
+                }
+              }
+            },
+            {
+              "name": "4. Seller Responds to Dispute",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{seller_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"message\": \"I sincerely apologize for the delay. There was an unexpected issue with the shipping company. I've just sent you the tracking number and the package should arrive tomorrow. Thank you for your patience!\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/dispute/{{demo_dispute_id}}/message",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "dispute", "{{demo_dispute_id}}", "message"]
+                }
+              }
+            },
+            {
+              "name": "5. Resolve Dispute",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{buyer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"resolutionType\": \"mediated_agreement\",\n  \"description\": \"Both parties agreed to continue with the transaction. Seller provided tracking and apologized for delay. Issue resolved amicably.\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/dispute/{{demo_dispute_id}}/resolve",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "dispute", "{{demo_dispute_id}}", "resolve"]
                 }
               }
             }

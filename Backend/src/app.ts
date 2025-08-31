@@ -6,6 +6,8 @@ import cors from 'cors';
 import authRoutes from './routes/auth';
 import transactionRoutes from './routes/transactions';
 import escrowRoutes from './routes/escrow';
+import { reputationRoutes } from './routes/reputation';
+import { disputeRoutes } from './routes/dispute';
 import apiRoutes from './routes/api';
 
 // Middleware imports
@@ -69,6 +71,8 @@ class App {
     this.app.use('/api/v1/auth', authRoutes);
     this.app.use('/api/v1/transactions', authMiddleware, transactionRoutes);
     this.app.use('/api/v1/escrow', authMiddleware, escrowRoutes);
+    this.app.use('/api/v1/reputation', reputationRoutes);
+    this.app.use('/api/v1/dispute', disputeRoutes);
     this.app.use('/api/v1', apiRoutes);
 
     // 404 handler

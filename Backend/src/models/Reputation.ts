@@ -1,287 +1,156 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export enum ReputationEventType {
-  TRANSACTION_COMPLETED = 'transaction_completed',
-  TRANSACTION_DISPUTED = 'transaction_disputed',
-  DISPUTE_RESOLVED = 'dispute_resolved',
-  REVIEW_RECEIVED = 'review_received',
-  VERIFICATION_COMPLETED = 'verification_completed',
-  PENALTY_APPLIED = 'penalty_applied'
+export enum RatingType {
+  BUYER_TO_SELLER = 'buyer_to_seller',
+  SELLER_TO_BUYER = 'seller_to_buyer'
 }
 
-export interface IReputationEvent {
-  type: ReputationEventType;
-  impact: number;
-  description: string;
-  relatedTransaction?: mongoose.Types.ObjectId;
-  relatedDispute?: mongoose.Types.ObjectId;
-  metadata: {
-    reviewRating?: number;
-    disputeOutcome?: 'buyer_favor' | 'seller_favor' | 'split';
-    verificationLevel?: 'email' | 'phone' | 'identity' | 'address';
-    penaltyReason?: string;
-    [key: string]: any;
-  };
-  timestamp: Date;
-}
-
-export interface IReputation extends Document {
+export interface IRating extends Document {
   _id: mongoose.Types.ObjectId;
-  user: mongoose.Types.ObjectId;
-  currentScore: number;
-  historicalHighScore: number;
-  historicalLowScore: number;
-  level: string;
-  stats: {
-    totalTransactions: number;
-    completedTransactions: number;
-    disputedTransactions: number;
-    wonDisputes: number;
-    lostDisputes: number;
+  escrowId: string;
+  rater: mongoose.Types.ObjectId;
+  rated: mongoose.Types.ObjectId;
+  ratingType: RatingType;
+  score: number;
+  comment?: string;
+  transactionAmount: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IReputationSummary extends Document {
+  _id: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+  averageRating: number;
+  totalRatings: number;
+  totalTransactionValue: string;
+  ratingBreakdown: {
+    five: number;
+    four: number;
+    three: number;
+    two: number;
+    one: number;
+  };
+  asBuyer: {
     averageRating: number;
-    totalReviews: number;
-    responseTimeHours: number;
+    totalRatings: number;
+    totalTransactionValue: string;
   };
-  events: IReputationEvent[];
-  achievements: Array<{
-    type: string;
-    name: string;
-    description: string;
-    unlockedAt: Date;
-    icon?: string;
-  }>;
-  penalties: Array<{
-    reason: string;
-    impact: number;
-    appliedAt: Date;
-    expiresAt?: Date;
-    isActive: boolean;
-  }>;
-  verifications: {
-    email: { verified: boolean; verifiedAt?: Date; };
-    phone: { verified: boolean; verifiedAt?: Date; };
-    identity: { verified: boolean; verifiedAt?: Date; level?: 'basic' | 'advanced'; };
-    address: { verified: boolean; verifiedAt?: Date; };
+  asSeller: {
+    averageRating: number;
+    totalRatings: number;
+    totalTransactionValue: string;
   };
-  trustMetrics: {
-    reliabilityScore: number;
-    communicationScore: number;
-    deliveryScore: number;
-    qualityScore: number;
-  };
+  level: string;
   lastUpdated: Date;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const ReputationEventSchema = new Schema<IReputationEvent>({
-  type: {
+const RatingSchema: Schema<IRating> = new Schema({
+  escrowId: {
     type: String,
-    required: [true, 'Event type is required'],
-    enum: Object.values(ReputationEventType)
+    required: [true, 'Escrow ID is required'],
+    validate: {
+      validator: function(v: string) {
+        return /^ESC_[A-Z0-9]{8}$/.test(v);
+      },
+      message: 'Invalid escrow ID format'
+    }
   },
-  impact: {
-    type: Number,
-    required: [true, 'Impact value is required'],
-    min: [-100, 'Impact cannot be less than -100'],
-    max: [100, 'Impact cannot be more than 100']
-  },
-  description: {
-    type: String,
-    required: [true, 'Description is required'],
-    maxlength: [500, 'Description cannot exceed 500 characters']
-  },
-  relatedTransaction: {
-    type: Schema.Types.ObjectId,
-    ref: 'Transaction'
-  },
-  relatedDispute: {
-    type: Schema.Types.ObjectId,
-    ref: 'Dispute'
-  },
-  metadata: {
-    reviewRating: {
-      type: Number,
-      min: [1, 'Rating cannot be less than 1'],
-      max: [5, 'Rating cannot be more than 5']
-    },
-    disputeOutcome: {
-      type: String,
-      enum: ['buyer_favor', 'seller_favor', 'split']
-    },
-    verificationLevel: {
-      type: String,
-      enum: ['email', 'phone', 'identity', 'address']
-    },
-    penaltyReason: String
-  },
-  timestamp: {
-    type: Date,
-    default: Date.now
-  }
-});
-
-const ReputationSchema: Schema<IReputation> = new Schema({
-  user: {
+  rater: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, 'User is required'],
+    required: [true, 'Rater is required']
+  },
+  rated: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: [true, 'Rated user is required']
+  },
+  ratingType: {
+    type: String,
+    required: [true, 'Rating type is required'],
+    enum: Object.values(RatingType)
+  },
+  score: {
+    type: Number,
+    required: [true, 'Rating score is required'],
+    min: [1, 'Rating must be at least 1 star'],
+    max: [5, 'Rating cannot exceed 5 stars'],
+    validate: {
+      validator: Number.isInteger,
+      message: 'Rating must be a whole number'
+    }
+  },
+  comment: {
+    type: String,
+    maxlength: [500, 'Comment cannot exceed 500 characters'],
+    trim: true
+  },
+  transactionAmount: {
+    type: String,
+    required: [true, 'Transaction amount is required'],
+    validate: {
+      validator: function(v: string) {
+        return /^\d+$/.test(v) && BigInt(v) > 0;
+      },
+      message: 'Transaction amount must be a valid positive number'
+    }
+  }
+}, {
+  timestamps: true
+});
+
+const ReputationSummarySchema: Schema<IReputationSummary> = new Schema({
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: [true, 'User ID is required'],
     unique: true
   },
-  currentScore: {
+  averageRating: {
     type: Number,
-    required: [true, 'Current score is required'],
-    default: 100,
-    min: [0, 'Score cannot be negative'],
-    max: [1000, 'Score cannot exceed 1000']
+    default: 0,
+    min: [0, 'Average rating cannot be negative'],
+    max: [5, 'Average rating cannot exceed 5']
   },
-  historicalHighScore: {
+  totalRatings: {
     type: Number,
-    default: 100,
-    min: [0, 'Score cannot be negative'],
-    max: [1000, 'Score cannot exceed 1000']
+    default: 0,
+    min: [0, 'Total ratings cannot be negative']
   },
-  historicalLowScore: {
-    type: Number,
-    default: 100,
-    min: [0, 'Score cannot be negative'],
-    max: [1000, 'Score cannot exceed 1000']
+  totalTransactionValue: {
+    type: String,
+    default: '0',
+    validate: {
+      validator: function(v: string) {
+        return /^\d+$/.test(v);
+      },
+      message: 'Total transaction value must be a valid number'
+    }
+  },
+  ratingBreakdown: {
+    five: { type: Number, default: 0, min: 0 },
+    four: { type: Number, default: 0, min: 0 },
+    three: { type: Number, default: 0, min: 0 },
+    two: { type: Number, default: 0, min: 0 },
+    one: { type: Number, default: 0, min: 0 }
+  },
+  asBuyer: {
+    averageRating: { type: Number, default: 0, min: 0, max: 5 },
+    totalRatings: { type: Number, default: 0, min: 0 },
+    totalTransactionValue: { type: String, default: '0' }
+  },
+  asSeller: {
+    averageRating: { type: Number, default: 0, min: 0, max: 5 },
+    totalRatings: { type: Number, default: 0, min: 0 },
+    totalTransactionValue: { type: String, default: '0' }
   },
   level: {
     type: String,
     default: 'Newcomer',
     enum: ['Newcomer', 'Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Elite']
-  },
-  stats: {
-    totalTransactions: {
-      type: Number,
-      default: 0,
-      min: [0, 'Total transactions cannot be negative']
-    },
-    completedTransactions: {
-      type: Number,
-      default: 0,
-      min: [0, 'Completed transactions cannot be negative']
-    },
-    disputedTransactions: {
-      type: Number,
-      default: 0,
-      min: [0, 'Disputed transactions cannot be negative']
-    },
-    wonDisputes: {
-      type: Number,
-      default: 0,
-      min: [0, 'Won disputes cannot be negative']
-    },
-    lostDisputes: {
-      type: Number,
-      default: 0,
-      min: [0, 'Lost disputes cannot be negative']
-    },
-    averageRating: {
-      type: Number,
-      default: 0,
-      min: [0, 'Average rating cannot be negative'],
-      max: [5, 'Average rating cannot exceed 5']
-    },
-    totalReviews: {
-      type: Number,
-      default: 0,
-      min: [0, 'Total reviews cannot be negative']
-    },
-    responseTimeHours: {
-      type: Number,
-      default: 0,
-      min: [0, 'Response time cannot be negative']
-    }
-  },
-  events: [ReputationEventSchema],
-  achievements: [{
-    type: {
-      type: String,
-      required: [true, 'Achievement type is required']
-    },
-    name: {
-      type: String,
-      required: [true, 'Achievement name is required']
-    },
-    description: {
-      type: String,
-      required: [true, 'Achievement description is required']
-    },
-    unlockedAt: {
-      type: Date,
-      default: Date.now
-    },
-    icon: String
-  }],
-  penalties: [{
-    reason: {
-      type: String,
-      required: [true, 'Penalty reason is required']
-    },
-    impact: {
-      type: Number,
-      required: [true, 'Penalty impact is required'],
-      max: [0, 'Penalty impact must be negative or zero']
-    },
-    appliedAt: {
-      type: Date,
-      default: Date.now
-    },
-    expiresAt: Date,
-    isActive: {
-      type: Boolean,
-      default: true
-    }
-  }],
-  verifications: {
-    email: {
-      verified: { type: Boolean, default: false },
-      verifiedAt: Date
-    },
-    phone: {
-      verified: { type: Boolean, default: false },
-      verifiedAt: Date
-    },
-    identity: {
-      verified: { type: Boolean, default: false },
-      verifiedAt: Date,
-      level: {
-        type: String,
-        enum: ['basic', 'advanced']
-      }
-    },
-    address: {
-      verified: { type: Boolean, default: false },
-      verifiedAt: Date
-    }
-  },
-  trustMetrics: {
-    reliabilityScore: {
-      type: Number,
-      default: 100,
-      min: [0, 'Reliability score cannot be negative'],
-      max: [100, 'Reliability score cannot exceed 100']
-    },
-    communicationScore: {
-      type: Number,
-      default: 100,
-      min: [0, 'Communication score cannot be negative'],
-      max: [100, 'Communication score cannot exceed 100']
-    },
-    deliveryScore: {
-      type: Number,
-      default: 100,
-      min: [0, 'Delivery score cannot be negative'],
-      max: [100, 'Delivery score cannot exceed 100']
-    },
-    qualityScore: {
-      type: Number,
-      default: 100,
-      min: [0, 'Quality score cannot be negative'],
-      max: [100, 'Quality score cannot exceed 100']
-    }
   },
   lastUpdated: {
     type: Date,
@@ -291,48 +160,37 @@ const ReputationSchema: Schema<IReputation> = new Schema({
   timestamps: true
 });
 
-// Middleware to update historical scores and level
-ReputationSchema.pre('save', function(next) {
-  if (this.currentScore > this.historicalHighScore) {
-    this.historicalHighScore = this.currentScore;
+RatingSchema.pre('save', function(next) {
+  if (this.rater.toString() === this.rated.toString()) {
+    next(new Error('Users cannot rate themselves'));
+  } else {
+    next();
   }
-  if (this.currentScore < this.historicalLowScore) {
-    this.historicalLowScore = this.currentScore;
-  }
-  
-  // Update level based on current score
-  if (this.currentScore >= 900) this.level = 'Elite';
-  else if (this.currentScore >= 800) this.level = 'Diamond';
-  else if (this.currentScore >= 700) this.level = 'Platinum';
-  else if (this.currentScore >= 600) this.level = 'Gold';
-  else if (this.currentScore >= 400) this.level = 'Silver';
-  else if (this.currentScore >= 200) this.level = 'Bronze';
+});
+
+ReputationSummarySchema.pre('save', function(next) {
+  if (this.averageRating >= 4.8) this.level = 'Elite';
+  else if (this.averageRating >= 4.5) this.level = 'Diamond';
+  else if (this.averageRating >= 4.2) this.level = 'Platinum';
+  else if (this.averageRating >= 3.8) this.level = 'Gold';
+  else if (this.averageRating >= 3.0) this.level = 'Silver';
+  else if (this.averageRating >= 2.0) this.level = 'Bronze';
   else this.level = 'Newcomer';
   
   this.lastUpdated = new Date();
   next();
 });
 
-// Method to add reputation event
-ReputationSchema.methods.addEvent = function(event: Partial<IReputationEvent>) {
-  this.events.push(event);
-  this.currentScore = Math.max(0, Math.min(1000, this.currentScore + event.impact!));
-  return this.save();
-};
+RatingSchema.index({ escrowId: 1 });
+RatingSchema.index({ rater: 1, rated: 1 });
+RatingSchema.index({ rated: 1, createdAt: -1 });
+RatingSchema.index({ escrowId: 1, ratingType: 1 }, { unique: true });
 
-// Method to calculate trust score
-ReputationSchema.methods.calculateTrustScore = function(): number {
-  const { reliabilityScore, communicationScore, deliveryScore, qualityScore } = this.trustMetrics;
-  return Math.round((reliabilityScore + communicationScore + deliveryScore + qualityScore) / 4);
-};
+ReputationSummarySchema.index({ userId: 1 });
+ReputationSummarySchema.index({ averageRating: -1 });
+ReputationSummarySchema.index({ totalRatings: -1 });
 
-// Indexes for efficient querying
-ReputationSchema.index({ user: 1 });
-ReputationSchema.index({ currentScore: -1 });
-ReputationSchema.index({ level: 1 });
-ReputationSchema.index({ lastUpdated: -1 });
-ReputationSchema.index({ 'stats.totalTransactions': -1 });
-ReputationSchema.index({ 'stats.averageRating': -1 });
+export const Rating = mongoose.model<IRating>('Rating', RatingSchema);
+export const ReputationSummary = mongoose.model<IReputationSummary>('ReputationSummary', ReputationSummarySchema);
 
-export const Reputation = mongoose.model<IReputation>('Reputation', ReputationSchema);
-export default Reputation;
+export default { Rating, ReputationSummary };

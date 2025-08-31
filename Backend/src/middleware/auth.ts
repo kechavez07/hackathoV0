@@ -2,13 +2,13 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/environment';
 
-interface AuthenticatedRequest extends Request {
+export interface AuthRequest extends Request {
   userId?: string;
   user?: any;
 }
 
-export const authMiddleware = async (
-  req: AuthenticatedRequest,
+export const authenticateToken = async (
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -46,8 +46,8 @@ export const authMiddleware = async (
   }
 };
 
-export const optionalAuthMiddleware = async (
-  req: AuthenticatedRequest,
+export const authMiddleware = async (
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
