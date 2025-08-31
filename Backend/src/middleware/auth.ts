@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import { config } from '../config/environment';
 
 interface AuthenticatedRequest extends Request {
   userId?: string;
@@ -21,10 +23,18 @@ export const authMiddleware = async (
       return;
     }
 
-    // TODO: Implement JWT token verification
-    // For now, we'll simulate a successful auth
-    req.userId = 'mock-user-id';
-    req.user = { id: 'mock-user-id', address: 'mock-address' };
+    // Verify JWT token
+    const decoded = (jwt as any).verify(token, config.jwtSecret || 'default-secret') as any;
+    
+    req.userId = decoded.userId;
+    req.user = {
+      userId: decoded.userId,
+      email: decoded.email,
+      liskAddress: decoded.liskAddress,
+      publicKey: decoded.publicKey
+    };
+    
+    console.log('🔐 User authenticated:', decoded.email);
     
     next();
   } catch (error) {
@@ -45,9 +55,16 @@ export const optionalAuthMiddleware = async (
     const token = req.header('Authorization')?.replace('Bearer ', '');
     
     if (token) {
-      // TODO: Implement JWT token verification
-      req.userId = 'mock-user-id';
-      req.user = { id: 'mock-user-id', address: 'mock-address' };
+      // Verify JWT token for optional auth
+      const decoded = (jwt as any).verify(token, config.jwtSecret || 'default-secret') as any;
+      
+      req.userId = decoded.userId;
+      req.user = {
+        userId: decoded.userId,
+        email: decoded.email,
+        liskAddress: decoded.liskAddress,
+        publicKey: decoded.publicKey
+      };
     }
     
     next();

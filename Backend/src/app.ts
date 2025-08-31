@@ -16,6 +16,9 @@ import { rateLimitMiddleware } from './middleware/rateLimit';
 // Load environment variables
 dotenv.config();
 
+// Import database connection
+import { connectDatabase } from './config/database';
+
 class App {
   public app: Application;
   private port: number;
@@ -98,17 +101,29 @@ class App {
     });
   }
 
-  public listen(): void {
-    this.app.listen(this.port, () => {
-      console.log(`Lisk TrustPay Backend running on port ${this.port}`);
-      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`Health check: http://localhost:${this.port}/health`);
-    });
+  public async listen(): Promise<void> {
+    try {
+      // Connect to database first
+      await connectDatabase();
+      
+      this.app.listen(this.port, () => {
+        console.log(`🚀 Lisk TrustPay Backend running on port ${this.port}`);
+        console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+        console.log(`❤️  Health check: http://localhost:${this.port}/health`);
+        console.log(`📊 Database: MongoDB Atlas connected`);
+      });
+    } catch (error) {
+      console.error('❌ Failed to start server:', error);
+      process.exit(1);
+    }
   }
 }
 
 // Create and start the application
 const application = new App();
-application.listen();
+application.listen().catch(error => {
+  console.error('❌ Failed to start application:', error);
+  process.exit(1);
+});
 
 export default App;
